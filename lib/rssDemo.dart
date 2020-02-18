@@ -12,13 +12,18 @@ class RSSDemo extends StatefulWidget {
 
 class _RSSDemoState extends State<RSSDemo> {
 //  static const FEED_URL = 'http://feeds.bbci.co.uk/bengali/rss.xml';
-  static const FEED_URL = 'https://www.nasa.gov/rss/dyn/educationnews.rss';
+//  static const FEED_URL = 'https://www.nasa.gov/rss/dyn/educationnews.rss';
+
+  static const FEED_URL = 'https://www.prothomalo.com/feed/';
 
   RssFeed _feed;
   String _title;
   static const String updateFeedMsg = 'Loading feed...';
   static const String feedLoadErrMsg = 'Error Loading Feed';
   static const String placeholderImage = 'images/noimage.png';
+  static const String feedOpenErrMsg = 'Error opening Feed';
+
+  GlobalKey<RefreshIndicatorState> _refreshKey;
 
   updateTitle(title) {
     setState(() {
@@ -30,6 +35,14 @@ class _RSSDemoState extends State<RSSDemo> {
     setState(() {
       _feed = feed;
     });
+  }
+
+  Future<void> openFeed(String url) async {
+    if (await canLaunch(url)) {
+      launch(url, forceSafariVC: false, forceWebView: true);
+      return;
+    }
+    updateTitle(feedOpenErrMsg);
   }
 
   title(title) {
@@ -80,10 +93,17 @@ class _RSSDemoState extends State<RSSDemo> {
         return ListTile(
           title: title(item.title),
           subtitle: subTitle(item.pubDate),
-          leading: thumbnail(item.enclosure.url),
+          //  leading: thumbnail(item.enclosure.url),
+          leading: SizedBox(
+            height: 50,
+            width: 70,
+            child: Image.asset(placeholderImage),
+          ),
           trailing: rightIcon(),
           contentPadding: EdgeInsets.all(5),
-          onTap: () {},
+          onTap: () {
+            openFeed(item.link);
+          },
         );
       },
     );
@@ -98,7 +118,11 @@ class _RSSDemoState extends State<RSSDemo> {
         ? Center(
             child: CircularProgressIndicator(),
           )
-        : list();
+        : RefreshIndicator(
+            key: _refreshKey,
+            child: list(),
+            onRefresh: () => load(),
+          );
   }
 
   load() async {
@@ -126,6 +150,7 @@ class _RSSDemoState extends State<RSSDemo> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _refreshKey = GlobalKey<RefreshIndicatorState>();
     updateTitle(widget.title);
     load();
   }
