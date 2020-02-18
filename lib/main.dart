@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'rssDemo.dart';
+import 'newslist.dart';
 
 void main() => runApp(MyApp());
 
@@ -8,8 +8,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'NEWS App',
-      home: RSSDemo(),
+      home: NewsList(),
     );
   }
 }

@@ -2,28 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:webfeed/webfeed.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+//import 'package:cached_network_image/cached_network_image.dart';
 
 class RSSDemo extends StatefulWidget {
+  RSSDemo({this.newsPortal, this.newsImg});
+  final String newsPortal;
+  final String newsImg;
   final String title = 'Demo Feed Title';
+
   @override
   _RSSDemoState createState() => _RSSDemoState();
 }
 
 class _RSSDemoState extends State<RSSDemo> {
-//  static const FEED_URL = 'http://feeds.bbci.co.uk/bengali/rss.xml';
-//  static const FEED_URL = 'https://www.nasa.gov/rss/dyn/educationnews.rss';
-
-  static const FEED_URL = 'https://www.prothomalo.com/feed/';
-
+  String feedUrl;
   RssFeed _feed;
   String _title;
+  String placeholderImage;
+
   static const String updateFeedMsg = 'Loading feed...';
   static const String feedLoadErrMsg = 'Error Loading Feed';
-  static const String placeholderImage = 'images/noimage.png';
   static const String feedOpenErrMsg = 'Error opening Feed';
 
   GlobalKey<RefreshIndicatorState> _refreshKey;
+  updatePortal(portal, img) {
+    setState(() {
+      feedUrl = portal;
+      placeholderImage = 'images/$img';
+    });
+  }
 
   updateTitle(title) {
     setState(() {
@@ -63,19 +70,19 @@ class _RSSDemoState extends State<RSSDemo> {
     );
   }
 
-  thumbnail(imgUrl) {
-    return Padding(
-      padding: EdgeInsets.only(left: 15),
-      child: CachedNetworkImage(
-        placeholder: (context, url) => Image.asset(placeholderImage),
-        imageUrl: imgUrl,
-        height: 50,
-        width: 70,
-        alignment: Alignment.center,
-        fit: BoxFit.fill,
-      ),
-    );
-  }
+//  thumbnail(imgUrl) {
+//    return Padding(
+//      padding: EdgeInsets.only(left: 15),
+//      child: CachedNetworkImage(
+//        placeholder: (context, url) => Image.asset(placeholderImage),
+//        imageUrl: imgUrl,
+//        height: 50,
+//        width: 70,
+//        alignment: Alignment.center,
+//        fit: BoxFit.fill,
+//      ),
+//    );
+//  }
 
   rightIcon() {
     return Icon(
@@ -140,7 +147,7 @@ class _RSSDemoState extends State<RSSDemo> {
   Future<RssFeed> loadFeed() async {
     try {
       final client = http.Client();
-      final response = await client.get(FEED_URL);
+      final response = await client.get(feedUrl);
       return RssFeed.parse(response.body);
     } catch (e) {}
     return null;
@@ -152,6 +159,7 @@ class _RSSDemoState extends State<RSSDemo> {
     super.initState();
     _refreshKey = GlobalKey<RefreshIndicatorState>();
     updateTitle(widget.title);
+    updatePortal(widget.newsPortal, widget.newsImg);
     load();
   }
 
